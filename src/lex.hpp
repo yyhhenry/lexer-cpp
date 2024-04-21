@@ -1,71 +1,54 @@
 // Header Only
 #pragma once
+#include "common.hpp"
 #include "lex_error.hpp"
-#include <algorithm>
-#include <exception>
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <optional>
-#include <set>
-#include <string>
-#include <string_view>
-#include <vector>
+
 namespace lex {
-    using std::cerr;
-    using std::ifstream;
-    using std::optional;
-    using std::set;
-    using std::string;
-    using std::string_view;
-    using std::vector;
-    using std::literals::string_literals::operator""s;
     using lex_error::LexerException;
 
-    const auto token_display_name = vector<string>{
+    const auto token_display_name = std::vector<std::string>{
         // struct keywords
-        "Var"s,
-        "If"s,
-        "Then"s,
-        "Else"s,
-        "While"s,
-        "Do"s,
-        "Begin"s,
-        "End"s,
+        "Var",
+        "If",
+        "Then",
+        "Else",
+        "While",
+        "Do",
+        "Begin",
+        "End",
 
         // operator keywords
-        "And"s,
-        "Or"s,
+        "And",
+        "Or",
 
         // type keywords
-        "Integer"s,
-        "Longint"s,
-        "Bool"s,
-        "Real"s,
+        "Integer",
+        "Longint",
+        "Bool",
+        "Real",
 
         // operators +|-|*|/|:=|<|>|<>|>=|<=|=|:|(|)
 
-        "Add"s,
-        "Sub"s,
-        "Mul"s,
-        "Div"s,
-        "Assign"s,
-        "Lt"s,
-        "Gt"s,
-        "Ne"s,
-        "Ge"s,
-        "Le"s,
-        "Eq"s,
-        "Colon"s,
-        "LParen"s,
-        "RParen"s,
+        "Add",
+        "Sub",
+        "Mul",
+        "Div",
+        "Assign",
+        "Lt",
+        "Gt",
+        "Ne",
+        "Ge",
+        "Le",
+        "Eq",
+        "Colon",
+        "LParen",
+        "RParen",
         // struct symbols
-        "Comma"s,
-        "SemiColon"s,
+        "Comma",
+        "SemiColon",
         // Literals and Identifiers
-        "Ident"s,
-        "IntLiteral"s,
+        "Identifier",
+        "IntLiteral",
     };
     enum TokenType {
         // struct keywords
@@ -126,25 +109,25 @@ namespace lex {
 
         // Literals and Identifiers
         /// Identifier [a-zA-Z][a-zA-Z0-9]*, case insensitive
-        Ident,
+        Identifier,
         /// Integer literal [1-9][0-9]*|0, no leading 0
         IntLiteral,
     };
     struct Token {
         TokenType type;
         int start;
-        string content;
+        std::string content;
         std::string to_string() const {
             return std::format("{} {} {}", start, token_display_name[type], content);
         }
     };
 #define match_keyword(s, ty) \
-    if (lett == s)           \
-        return Token { ty, start, lett }
+    if (word == s)           \
+        return Token { ty, start, word }
     struct Lexer {
-        string src;
+        std::string src;
         int pos;
-        optional<Token> next_token() {
+        std::optional<Token> next_token() {
             while (pos < src.size() && isspace(src[pos])) {
                 pos++;
             }
@@ -155,12 +138,12 @@ namespace lex {
             int start = pos;
             if (isalpha(src[pos])) {
 
-                string lett = "";
+                std::string word = "";
                 while (pos < src.size() && isalnum(src[pos])) {
-                    lett += src[pos];
+                    word += src[pos];
                     pos++;
                 }
-                transform(lett.begin(), lett.end(), lett.begin(), ::tolower);
+                transform(word.begin(), word.end(), word.begin(), ::tolower);
                 match_keyword("var", Var);
                 match_keyword("if", If);
                 match_keyword("then", Then);
@@ -175,20 +158,20 @@ namespace lex {
                 match_keyword("longint", Longint);
                 match_keyword("bool", Bool);
                 match_keyword("real", Real);
-                return Token{Ident, start, lett};
+                return Token{Identifier, start, word};
             } else if (isdigit(src[pos])) {
-                string lett = "";
+                std::string word = "";
                 while (pos < src.size() && isdigit(src[pos])) {
-                    lett += src[pos];
+                    word += src[pos];
                     pos++;
                 }
-                if (lett[0] == '0' && lett.size() > 1) {
-                    throw LexerException(pos, std::format("invalid integer literal {}", lett));
+                if (word[0] == '0' && word.size() > 1) {
+                    throw LexerException(pos, std::format("invalid integer literal {}", word));
                 }
                 if (pos < src.size() && isalpha(src[pos])) {
                     throw LexerException(pos, "unexpected character");
                 }
-                return Token{IntLiteral, start, lett};
+                return Token{IntLiteral, start, word};
             } else if (src[pos] == ':' && pos < src.size() + 1 && src[pos + 1] == '=') {
                 pos += 2;
                 return Token{Assign, start, ":="};
@@ -246,9 +229,9 @@ namespace lex {
     };
 #undef match_keyword
 
-    vector<Token> lex(string src) {
+    std::vector<Token> lex(const std::string &src) {
         auto lexer = Lexer{src, 0};
-        vector<Token> tokens;
+        std::vector<Token> tokens;
         while (1) {
             auto token = lexer.next_token();
             if (!token.has_value()) {

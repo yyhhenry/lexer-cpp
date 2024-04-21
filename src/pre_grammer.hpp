@@ -1,36 +1,19 @@
 // Header Only
 #pragma once
+#include "common.hpp"
 #include "lex.hpp"
 #include "lex_error.hpp"
-#include <algorithm>
-#include <exception>
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <optional>
-#include <set>
-#include <string>
-#include <string_view>
-#include <vector>
+
 namespace pre_grammar {
-    using std::cerr;
-    using std::ifstream;
-    using std::optional;
-    using std::set;
-    using std::string;
-    using std::string_view;
-    using std::vector;
-    using std::literals::string_literals::operator""s;
     using lex::Token;
     using lex::TokenType;
     using lex_error::LexerException;
 
     struct PreGrammar {
-        set<string> used;
-        vector<Token> tokens;
+        std::set<std::string> used;
+        std::vector<Token> tokens;
         int pos;
-        PreGrammar(vector<Token> tokens) : tokens(tokens), pos(), used() {}
+        PreGrammar(const std::vector<Token> &tokens) : tokens(tokens), pos(), used() {}
         void parse_var_block() {
             if (pos < tokens.size() && tokens[pos].type == TokenType::Var) {
                 pos++;
@@ -42,11 +25,11 @@ namespace pre_grammar {
 
                 while (pos < tokens.size()) {
 
-                    if (tokens[pos].type != TokenType::Ident) {
-                        throw LexerException(tokens[pos].start, "missing Ident");
+                    if (tokens[pos].type != TokenType::Identifier) {
+                        throw LexerException(tokens[pos].start, "missing Identifier");
                     } else {
                         if (used.count(tokens[pos].content)) {
-                            throw LexerException(tokens[pos].start, "redefined Ident");
+                            throw LexerException(tokens[pos].start, "redefined Identifier");
                         }
                         used.insert(tokens[pos].content);
                         pos++;
@@ -84,9 +67,9 @@ namespace pre_grammar {
             int matchBE = 1;
 
             while (pos < tokens.size()) {
-                if (tokens[pos].type == TokenType::Ident) {
+                if (tokens[pos].type == TokenType::Identifier) {
                     if (!used.count(tokens[pos].content)) {
-                        throw LexerException(tokens[pos].start, "undefined Ident");
+                        throw LexerException(tokens[pos].start, "undefined Identifier");
                     }
                 }
                 if (tokens[pos].type == TokenType::End) {
