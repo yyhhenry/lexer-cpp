@@ -4,13 +4,13 @@
 #include "pre_grammer.hpp"
 
 std::string read_file(const std::string &filename) {
-    using i_itr = std::istreambuf_iterator<char>;
+    using in_iter = std::istreambuf_iterator<char>;
 
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error(std::format("Error: could not open file {}", filename));
     }
-    auto content = std::string(i_itr(file), i_itr());
+    auto content = std::string(in_iter(file), in_iter());
     file.close();
     return content;
 }
