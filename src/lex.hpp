@@ -229,7 +229,7 @@ namespace lex {
     };
 #undef match_keyword
 
-    std::vector<Token> lex(const std::string &src) {
+    inline std::vector<Token> lex(const std::string &src) {
         auto lexer = Lexer{src, 0};
         std::vector<Token> tokens;
         while (1) {
