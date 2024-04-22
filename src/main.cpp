@@ -72,9 +72,12 @@ int main(int argc, char *argv[]) {
             auto pre_grammar = pre_grammar::PreGrammar(tokens);
             pre_grammar.parse_code();
             auto output_file = args.output_file.value_or("a.out");
+            auto output = std::ofstream(output_file);
             for (auto &token : tokens) {
-                std::cout << token.to_string() << std::endl;
+                output << token.to_string() << std::endl;
             }
+            output.close();
+            std::cout << std::format("Output written to {}", output_file) << std::endl;
             return 0;
         } catch (lex::LexerException &e) {
             line_pos.print_err(args.input_file, e.offset, e.msg);
